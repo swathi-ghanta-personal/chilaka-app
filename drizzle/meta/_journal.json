@@ -8,6 +8,13 @@
       "when": 1778727739156,
       "tag": "0000_sloppy_obadiah_stane",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778730003390,
+      "tag": "0001_ambitious_thunderbird",
+      "breakpoints": true
     }
   ]
 }
