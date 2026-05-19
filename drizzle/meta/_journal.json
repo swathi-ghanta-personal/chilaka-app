@@ -15,6 +15,20 @@
       "when": 1778730003390,
       "tag": "0001_ambitious_thunderbird",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779161600766,
+      "tag": "0002_powerful_flatman",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779161613844,
+      "tag": "0003_lying_scarecrow",
+      "breakpoints": true
     }
   ]
 }
