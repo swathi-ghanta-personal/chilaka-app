@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, timestamp, index } from 'drizzle-orm/pg-core';
+import { pgTable, serial, integer, text, timestamp, index, uniqueIndex } from 'drizzle-orm/pg-core';
 import { user } from './auth.schema';
 
 export const task = pgTable('task', {
@@ -22,6 +22,17 @@ export const flashcard = pgTable(
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},
 	(table) => [index('flashcard_userId_idx').on(table.userId)]
+);
+
+export const ttsCache = pgTable(
+	'tts_cache',
+	{
+		id: serial('id').primaryKey(),
+		teluguScript: text('telugu_script').notNull(),
+		audioBase64: text('audio_base64').notNull(),
+		createdAt: timestamp('created_at').defaultNow().notNull()
+	},
+	(table) => [uniqueIndex('tts_cache_script_idx').on(table.teluguScript)]
 );
 
 export * from './auth.schema';
