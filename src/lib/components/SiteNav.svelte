@@ -3,7 +3,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ActionResult } from '@sveltejs/kit';
-	import favicon from '$lib/assets/favicon.svg';
+	import parrot from '$lib/assets/parrot.png';
 	import {
 		BookOpen,
 		BookA,
@@ -95,7 +95,7 @@
 <aside class="sidebar" class:collapsed={sidebarCollapsed} aria-label="Site navigation">
 	<div class="sidebar-top">
 		<a href="/" class="brand" onclick={closeMobileMenu}>
-			<img src={favicon} class="brand-icon" alt="Chilaka" width="28" height="28" />
+			<img src={parrot} class="brand-icon" alt="Chilaka" width="48" height="48" />
 			<span class="brand-name">Chilaka</span>
 		</a>
 
@@ -280,7 +280,7 @@
 	.brand {
 		display: flex;
 		align-items: center;
-		gap: 0.4rem;
+		gap: 0.15rem;
 		text-decoration: none;
 		min-width: 0;
 		flex: 1;
@@ -288,13 +288,15 @@
 
 	.brand-icon {
 		flex-shrink: 0;
-		display: none;
+		display: block;
 		border-radius: var(--radius-sm);
+		width: 48px;
+		height: 48px;
 	}
 
 	.brand-name {
 		font-family: var(--font-display);
-		font-size: 1.8rem;
+		font-size: 1.6rem;
 		font-weight: 400;
 		color: var(--color-primary);
 		letter-spacing: 0.01em;
@@ -479,10 +481,6 @@
 
 		.sidebar.collapsed .brand {
 			flex: 0 0 auto;
-		}
-
-		.sidebar.collapsed .brand-icon {
-			display: block;
 		}
 
 		.sidebar.collapsed .brand-name {
