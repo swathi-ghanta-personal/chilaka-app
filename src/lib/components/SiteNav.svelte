@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/state';
 	import type { ActionResult } from '@sveltejs/kit';
 
 	type NavUser = {
@@ -19,6 +20,17 @@
 
 	let dialog: HTMLDialogElement | undefined = $state();
 	let activeTab = $state<'signin' | 'signup'>('signin');
+
+	const pageLinks = [
+		{ href: '/', label: 'Flashcards' },
+		{ href: '/verbs', label: 'Verbs' }
+	];
+
+	function isActive(href: string): boolean {
+		const path = page.url.pathname;
+		if (href === '/') return path === '/';
+		return path === href || path.startsWith(href + '/');
+	}
 
 	function openModal(tab: 'signin' | 'signup' = 'signin') {
 		activeTab = tab;
@@ -62,6 +74,19 @@
 			>
 		</div>
 	{/if}
+</nav>
+
+<nav class="page-nav" aria-label="Primary">
+	{#each pageLinks as link (link.href)}
+		<a
+			href={link.href}
+			class="page-link"
+			class:active={isActive(link.href)}
+			aria-current={isActive(link.href) ? 'page' : undefined}
+		>
+			{link.label}
+		</a>
+	{/each}
 </nav>
 
 <!-- Auth modal -->
@@ -153,8 +178,8 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: 0.75rem;
-		max-width: 560px;
-		margin: 0 auto 1.25rem;
+		max-width: 640px;
+		margin: 0 auto 0.5rem;
 		padding: 0 1.25rem;
 		font-family:
 			ui-sans-serif,
@@ -163,6 +188,44 @@
 			'Segoe UI',
 			Roboto,
 			sans-serif;
+	}
+
+	.page-nav {
+		display: flex;
+		gap: 0.25rem;
+		max-width: 640px;
+		margin: 0 auto 1.5rem;
+		padding: 0 1.25rem;
+		border-bottom: 1px solid #eee;
+		font-family:
+			ui-sans-serif,
+			system-ui,
+			-apple-system,
+			'Segoe UI',
+			Roboto,
+			sans-serif;
+	}
+
+	.page-link {
+		font-size: 0.9rem;
+		font-weight: 500;
+		color: #777;
+		text-decoration: none;
+		padding: 0.55rem 0.85rem 0.65rem;
+		border-bottom: 2px solid transparent;
+		margin-bottom: -1px;
+		transition:
+			color 120ms ease,
+			border-color 120ms ease;
+	}
+
+	.page-link:hover {
+		color: #1a1a1a;
+	}
+
+	.page-link.active {
+		color: #1a1a1a;
+		border-bottom-color: #1a1a1a;
 	}
 
 	.brand {
