@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import { Mic, Square, Trash2, Volume2 } from '@lucide/svelte';
 	import type { PageData } from './$types';
 
 	type SourceLang = 'te' | 'en';
@@ -15,7 +16,6 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let sourceLang = $state<SourceLang>('te');
 	let textInput = $state('');
 	let card = $state<TranslatedCard | null>(null);
 
@@ -29,10 +29,6 @@
 
 	const playingIds = $state(new Set<string>());
 
-	function placeholder(lang: SourceLang) {
-		return lang === 'te' ? 'Telugu word (in Telugu script or English letters)' : 'English word';
-	}
-
 	async function translateText() {
 		const text = textInput.trim();
 		if (!text || translating) return;
@@ -45,7 +41,7 @@
 			const res = await fetch('/api/translate', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ text, sourceLang })
+				body: JSON.stringify({ text })
 			});
 
 			if (!res.ok) {
@@ -108,7 +104,6 @@
 			const form = new FormData();
 			const ext = (mediaRecorder?.mimeType || 'audio/webm').includes('mp4') ? 'mp4' : 'webm';
 			form.append('audio', new File([blob], `voice.${ext}`, { type: blob.type }));
-			form.append('sourceLang', sourceLang);
 
 			const res = await fetch('/api/translate', { method: 'POST', body: form });
 
@@ -171,25 +166,6 @@
 		<p class="tagline">Add a flashcard by voice or text.</p>
 	</header>
 
-	<section class="lang-toggle" aria-label="Source language">
-		<button
-			type="button"
-			class="toggle"
-			class:active={sourceLang === 'te'}
-			onclick={() => (sourceLang = 'te')}
-		>
-			Telugu
-		</button>
-		<button
-			type="button"
-			class="toggle"
-			class:active={sourceLang === 'en'}
-			onclick={() => (sourceLang = 'en')}
-		>
-			English
-		</button>
-	</section>
-
 	<section class="input">
 		<form
 			onsubmit={(event) => {
@@ -197,14 +173,30 @@
 				translateText();
 			}}
 		>
-			<input
-				type="text"
-				bind:value={textInput}
-				placeholder={placeholder(sourceLang)}
-				disabled={translating || recording}
-				autocomplete="off"
-				autocapitalize="off"
-			/>
+			<div class="input-wrap">
+				<input
+					type="text"
+					bind:value={textInput}
+					placeholder="Telugu or English word"
+					disabled={translating || recording}
+					autocomplete="off"
+					autocapitalize="off"
+				/>
+				<button
+					type="button"
+					class="mic-btn"
+					class:recording
+					disabled={translating && !recording}
+					onclick={recording ? stopRecording : startRecording}
+					aria-label={recording ? 'Stop recording' : 'Record audio'}
+				>
+					{#if recording}
+						<Square size={18} strokeWidth={2} aria-hidden="true" />
+					{:else}
+						<Mic size={18} strokeWidth={2} aria-hidden="true" />
+					{/if}
+				</button>
+			</div>
 			<button
 				type="submit"
 				class="primary"
@@ -213,17 +205,6 @@
 				Translate
 			</button>
 		</form>
-
-		<button
-			type="button"
-			class="mic"
-			class:recording
-			disabled={translating && !recording}
-			onclick={recording ? stopRecording : startRecording}
-			aria-label={recording ? 'Stop recording' : 'Record audio'}
-		>
-			{recording ? 'Stop' : 'Speak'}
-		</button>
 	</section>
 
 	{#if translating}
@@ -245,7 +226,7 @@
 					disabled={playingIds.has('result')}
 					aria-label="Play pronunciation"
 				>
-					{playingIds.has('result') ? '▶︎…' : '▶︎'}
+					<Volume2 size={16} strokeWidth={2} aria-hidden="true" />
 				</button>
 			</div>
 			<div class="result-row roman">{card.teluguRoman}</div>
@@ -287,15 +268,33 @@
 							<span class="roman">{item.teluguRoman}</span>
 							<span class="english">{item.english}</span>
 						</div>
-						<button
-							type="button"
-							class="play small"
-							onclick={() => playPronunciation(item.teluguScript, `saved-${item.id}`)}
-							disabled={playingIds.has(`saved-${item.id}`)}
-							aria-label="Play pronunciation"
-						>
-							{playingIds.has(`saved-${item.id}`) ? '▶︎…' : '▶︎'}
-						</button>
+						<div class="saved-actions">
+							<button
+								type="button"
+								class="play small"
+								onclick={() => playPronunciation(item.teluguScript, `saved-${item.id}`)}
+								disabled={playingIds.has(`saved-${item.id}`)}
+								aria-label="Play pronunciation"
+							>
+								<Volume2 size={14} strokeWidth={2} aria-hidden="true" />
+							</button>
+							<form
+								method="post"
+								action="?/delete"
+								use:enhance={() =>
+									async ({ result, update }) => {
+										await update({ reset: false });
+										if (result.type === 'success') {
+											await invalidateAll();
+										}
+									}}
+							>
+								<input type="hidden" name="id" value={item.id} />
+								<button type="submit" class="delete-btn" aria-label="Delete flashcard">
+									<Trash2 size={14} strokeWidth={2} aria-hidden="true" />
+								</button>
+							</form>
+						</div>
 					</li>
 				{/each}
 			</ul>
@@ -307,14 +306,8 @@
 	main {
 		max-width: 560px;
 		margin: 0 auto;
-		padding: 0 1.25rem 4rem;
-		font-family:
-			ui-sans-serif,
-			system-ui,
-			-apple-system,
-			'Segoe UI',
-			Roboto,
-			sans-serif;
+		padding: 1.5rem 1.25rem 4rem;
+		font-family: inherit;
 		color: #1a1a1a;
 	}
 
@@ -335,57 +328,72 @@
 		font-size: 0.95rem;
 	}
 
-	.lang-toggle {
-		display: inline-flex;
-		gap: 0;
-		background: #f1f1f1;
-		padding: 4px;
-		border-radius: 999px;
-		margin-bottom: 1.25rem;
-	}
-
-	.toggle {
-		appearance: none;
-		border: 0;
-		background: transparent;
-		padding: 0.5rem 1rem;
-		font-size: 0.9rem;
-		border-radius: 999px;
-		cursor: pointer;
-		color: #555;
-		font-weight: 500;
-	}
-
-	.toggle.active {
-		background: #fff;
-		color: #1a1a1a;
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-	}
-
-	.input {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-
 	.input form {
 		display: flex;
-		flex: 1;
 		gap: 0.5rem;
 	}
 
-	input[type='text'] {
+	.input-wrap {
+		position: relative;
 		flex: 1;
-		padding: 0.75rem 0.9rem;
+		min-width: 0;
+	}
+
+	.input-wrap input[type='text'] {
+		width: 100%;
+		box-sizing: border-box;
+		padding: 0.75rem 2.75rem 0.75rem 0.9rem;
 		font-size: 1rem;
 		border: 1px solid #ddd;
 		border-radius: 10px;
 		background: #fff;
 	}
 
-	input[type='text']:focus {
+	.input-wrap input[type='text']:focus {
 		outline: none;
 		border-color: #888;
+	}
+
+	.mic-btn {
+		position: absolute;
+		right: 0.35rem;
+		top: 50%;
+		transform: translateY(-50%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 34px;
+		height: 34px;
+		padding: 0;
+		border: none;
+		background: transparent;
+		color: #555;
+		border-radius: 8px;
+		cursor: pointer;
+	}
+
+	.mic-btn:hover:not(:disabled) {
+		background: #f0f0f0;
+		color: #1a1a1a;
+	}
+
+	.mic-btn.recording {
+		background: #d24545;
+		color: #fff;
+	}
+
+	.mic-btn.recording:hover:not(:disabled) {
+		background: #b83838;
+		color: #fff;
+	}
+
+	.mic-btn:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
+	.input {
+		margin-bottom: 1rem;
 	}
 
 	button {
@@ -401,6 +409,7 @@
 		font-size: 0.95rem;
 		border-radius: 10px;
 		font-weight: 500;
+		white-space: nowrap;
 	}
 
 	.primary:disabled {
@@ -416,28 +425,6 @@
 		font-size: 0.95rem;
 		border-radius: 10px;
 		margin-left: 0.5rem;
-	}
-
-	.mic {
-		background: #fff;
-		color: #1a1a1a;
-		border: 1px solid #ddd;
-		padding: 0.7rem 1rem;
-		font-size: 0.95rem;
-		border-radius: 10px;
-		font-weight: 500;
-		min-width: 92px;
-	}
-
-	.mic.recording {
-		background: #d24545;
-		color: #fff;
-		border-color: #d24545;
-	}
-
-	.mic:disabled {
-		opacity: 0.4;
-		cursor: not-allowed;
 	}
 
 	.status,
@@ -492,8 +479,12 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 0.85rem;
 		padding: 0;
+		color: #1a1a1a;
+	}
+
+	.play:hover:not(:disabled) {
+		background: #f5f5f5;
 	}
 
 	.play:disabled {
@@ -503,7 +494,6 @@
 	.play.small {
 		width: 30px;
 		height: 30px;
-		font-size: 0.75rem;
 	}
 
 	.saved h2 {
@@ -555,5 +545,31 @@
 	.saved-text .english {
 		font-size: 0.95rem;
 		color: #333;
+	}
+
+	.saved-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		flex-shrink: 0;
+	}
+
+	.delete-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 30px;
+		height: 30px;
+		padding: 0;
+		border: 1px solid #ddd;
+		border-radius: 999px;
+		background: #fff;
+		color: #888;
+	}
+
+	.delete-btn:hover {
+		background: #fff5f5;
+		border-color: #fecaca;
+		color: #c0392b;
 	}
 </style>

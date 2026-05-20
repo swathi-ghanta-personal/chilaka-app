@@ -1,5 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { flashcard } from '$lib/server/db/schema';
 import { auth } from '$lib/server/auth';
@@ -95,5 +95,21 @@ export const actions: Actions = {
 		});
 
 		return { saved: true };
+	},
+	delete: async ({ request, locals }) => {
+		if (!locals.user) return fail(401, { error: 'Not authenticated' });
+
+		const form = await request.formData();
+		const id = Number(form.get('id'));
+
+		if (!Number.isInteger(id) || id < 1) {
+			return fail(400, { error: 'Invalid flashcard id' });
+		}
+
+		await db
+			.delete(flashcard)
+			.where(and(eq(flashcard.id, id), eq(flashcard.userId, locals.user.id)));
+
+		return { deleted: true };
 	}
 };

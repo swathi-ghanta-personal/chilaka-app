@@ -18,6 +18,34 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<SiteNav user={data.user} isAnonymous={data.isAnonymous} {authMessage} />
+<div class="app-shell">
+	<SiteNav user={data.user} isAnonymous={data.isAnonymous} {authMessage} />
+	<div class="app-main">
+		{@render children()}
+	</div>
+</div>
 
-{@render children()}
+<style>
+	.app-shell {
+		display: flex;
+		min-height: 100vh;
+		font-family:
+			ui-sans-serif,
+			system-ui,
+			-apple-system,
+			'Segoe UI',
+			Roboto,
+			sans-serif;
+	}
+
+	.app-main {
+		flex: 1;
+		min-width: 0;
+	}
+
+	@media (max-width: 767px) {
+		.app-shell {
+			flex-direction: column;
+		}
+	}
+</style>
