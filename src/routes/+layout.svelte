@@ -2,6 +2,7 @@
 	import '../app.css';
 	import parrot from '$lib/assets/parrot.png';
 	import SiteNav from '$lib/components/SiteNav.svelte';
+	import Toast from '$lib/components/Toast.svelte';
 	import type { ActionData, LayoutData } from './$types';
 
 	let {
@@ -25,6 +26,8 @@
 		{@render children()}
 	</div>
 </div>
+
+<Toast />
 
 <style>
 	.app-shell {

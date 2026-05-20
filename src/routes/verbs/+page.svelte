@@ -116,6 +116,9 @@
 							<button
 								type="button"
 								class="play"
+								class:playing={playingIds.has(
+									`conj-${selectedVerb.id}-${selectedTense}-${idx}`
+								)}
 								onclick={() =>
 									playPronunciation(
 										row.verb.script,
@@ -126,9 +129,7 @@
 								)}
 								aria-label="Play pronunciation"
 							>
-								{playingIds.has(`conj-${selectedVerb.id}-${selectedTense}-${idx}`)
-									? '▶︎…'
-									: '▶︎'}
+								▶︎
 							</button>
 						</td>
 					</tr>
@@ -150,6 +151,7 @@
 					<button
 						type="button"
 						class="play"
+						class:playing={playingIds.has(`ex-${selectedVerb.id}-${selectedTense}-${idx}`)}
 						onclick={() =>
 							playPronunciation(
 								ex.script,
@@ -158,9 +160,7 @@
 						disabled={playingIds.has(`ex-${selectedVerb.id}-${selectedTense}-${idx}`)}
 						aria-label="Play sentence"
 					>
-						{playingIds.has(`ex-${selectedVerb.id}-${selectedTense}-${idx}`)
-							? '▶︎…'
-							: '▶︎'}
+						▶︎
 					</button>
 				</li>
 			{/each}
@@ -399,11 +399,34 @@
 		padding: 0;
 		cursor: pointer;
 		color: #1a1a1a;
+		transition: transform 120ms ease;
+	}
+
+	.play:active:not(:disabled) {
+		transform: scale(0.92);
 	}
 
 	.play:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
+		opacity: 1;
+		cursor: progress;
+	}
+
+	.play.playing {
+		color: var(--color-primary, #e8608a);
+		border-color: color-mix(in srgb, var(--color-primary, #e8608a) 35%, #ddd);
+		animation: play-pulse 1.4s ease-out infinite;
+	}
+
+	@keyframes play-pulse {
+		0% {
+			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary, #e8608a) 45%, transparent);
+		}
+		70% {
+			box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-primary, #e8608a) 0%, transparent);
+		}
+		100% {
+			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary, #e8608a) 0%, transparent);
+		}
 	}
 
 	.examples h2 {

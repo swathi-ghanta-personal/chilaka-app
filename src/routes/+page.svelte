@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-	import { Mic, Square, Trash2, Volume2 } from '@lucide/svelte';
+	import { LoaderCircle, Mic, Square, Trash2, Volume2 } from '@lucide/svelte';
+	import { showToast } from '$lib/stores/toast.svelte';
 	import type { PageData } from './$types';
 
 	type SourceLang = 'te' | 'en';
@@ -200,16 +201,19 @@
 			<button
 				type="submit"
 				class="primary"
+				class:is-loading={translating}
 				disabled={translating || recording || !textInput.trim()}
+				aria-busy={translating}
 			>
-				Translate
+				<span class="btn-label">Translate</span>
+				{#if translating}
+					<span class="btn-spinner" aria-hidden="true">
+						<LoaderCircle size={16} strokeWidth={2.25} />
+					</span>
+				{/if}
 			</button>
 		</form>
 	</section>
-
-	{#if translating}
-		<p class="status">Translating…</p>
-	{/if}
 
 	{#if error}
 		<p class="error" role="alert">{error}</p>
@@ -222,6 +226,7 @@
 				<button
 					type="button"
 					class="play"
+					class:playing={playingIds.has('result')}
 					onclick={() => playPronunciation(card!.teluguScript, 'result')}
 					disabled={playingIds.has('result')}
 					aria-label="Play pronunciation"
@@ -272,6 +277,7 @@
 							<button
 								type="button"
 								class="play small"
+								class:playing={playingIds.has(`saved-${item.id}`)}
 								onclick={() => playPronunciation(item.teluguScript, `saved-${item.id}`)}
 								disabled={playingIds.has(`saved-${item.id}`)}
 								aria-label="Play pronunciation"
@@ -285,6 +291,7 @@
 									async ({ result, update }) => {
 										await update({ reset: false });
 										if (result.type === 'success') {
+											showToast('Flashcard successfully deleted');
 											await invalidateAll();
 										}
 									}}
@@ -403,6 +410,11 @@
 	}
 
 	.primary {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
 		background: #1a1a1a;
 		color: #fff;
 		border: 0;
@@ -418,6 +430,28 @@
 		cursor: not-allowed;
 	}
 
+	.primary.is-loading {
+		opacity: 0.85;
+		cursor: progress;
+	}
+
+	.primary.is-loading .btn-label {
+		opacity: 0.65;
+	}
+
+	.btn-spinner {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		animation: btn-spin 0.9s linear infinite;
+	}
+
+	@keyframes btn-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
 	.secondary {
 		background: transparent;
 		color: #666;
@@ -428,13 +462,9 @@
 		margin-left: 0.5rem;
 	}
 
-	.status,
 	.error {
 		font-size: 0.9rem;
 		margin: 0.5rem 0 1rem;
-	}
-
-	.error {
 		color: #c0392b;
 	}
 
@@ -482,14 +512,51 @@
 		justify-content: center;
 		padding: 0;
 		color: #1a1a1a;
+		transition: transform 120ms ease;
 	}
 
 	.play:hover:not(:disabled) {
 		background: #f5f5f5;
 	}
 
+	.play:active:not(:disabled) {
+		transform: scale(0.92);
+	}
+
 	.play:disabled {
-		opacity: 0.6;
+		opacity: 1;
+	}
+
+	.play.playing {
+		color: var(--color-primary, #e8608a);
+		border-color: color-mix(in srgb, var(--color-primary, #e8608a) 35%, #ddd);
+		animation: play-pulse 1.4s ease-out infinite;
+	}
+
+	.play.playing :global(svg) {
+		animation: play-icon-pulse 1.4s ease-in-out infinite;
+	}
+
+	@keyframes play-pulse {
+		0% {
+			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary, #e8608a) 45%, transparent);
+		}
+		70% {
+			box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-primary, #e8608a) 0%, transparent);
+		}
+		100% {
+			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary, #e8608a) 0%, transparent);
+		}
+	}
+
+	@keyframes play-icon-pulse {
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.12);
+		}
 	}
 
 	.play.small {
