@@ -172,15 +172,9 @@
 	main {
 		max-width: 640px;
 		margin: 0 auto;
-		padding: 0 1.25rem 4rem;
-		font-family:
-			ui-sans-serif,
-			system-ui,
-			-apple-system,
-			'Segoe UI',
-			Roboto,
-			sans-serif;
-		color: #1a1a1a;
+		padding: var(--space-lg) var(--space-lg) var(--space-xl);
+		font-family: inherit;
+		color: var(--color-text);
 	}
 
 	header {
@@ -188,16 +182,17 @@
 	}
 
 	h1.page-title {
-		font-size: 1.75rem;
+		font-size: var(--text-lg);
 		font-weight: 600;
 		margin: 0 0 0.25rem;
 		letter-spacing: -0.01em;
+		color: var(--color-text-muted);
 	}
 
 	.tagline {
 		margin: 0;
-		color: #666;
-		font-size: 0.95rem;
+		color: var(--color-text-muted);
+		font-size: var(--text-sm);
 	}
 
 	.verb-picker {

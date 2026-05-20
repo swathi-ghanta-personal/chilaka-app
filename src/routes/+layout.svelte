@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import SiteNav from '$lib/components/SiteNav.svelte';
 	import type { ActionData, LayoutData } from './$types';
@@ -29,13 +30,6 @@
 	.app-shell {
 		display: flex;
 		min-height: 100vh;
-		font-family:
-			ui-sans-serif,
-			system-ui,
-			-apple-system,
-			'Segoe UI',
-			Roboto,
-			sans-serif;
 	}
 
 	.app-main {
