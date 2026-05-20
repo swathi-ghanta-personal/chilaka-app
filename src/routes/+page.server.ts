@@ -3,6 +3,7 @@ import { and, desc, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { flashcard } from '$lib/server/db/schema';
 import { auth } from '$lib/server/auth';
+import { synthesizeTelugu } from '$lib/server/tts';
 import { APIError } from 'better-auth/api';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -93,6 +94,13 @@ export const actions: Actions = {
 			sourceLang,
 			sourceInput: sourceInput || english
 		});
+
+		// Pre-warm TTS so the Quiz can play audio from cache, not OpenAI.
+		try {
+			await synthesizeTelugu(teluguScript);
+		} catch (err) {
+			console.error('[save] tts prewarm failed', err);
+		}
 
 		return { saved: true };
 	},

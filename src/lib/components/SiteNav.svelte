@@ -9,6 +9,7 @@
 		BookA,
 		ChevronsLeft,
 		ChevronsRight,
+		GraduationCap,
 		LogIn,
 		LogOut,
 		Menu,
@@ -37,7 +38,8 @@
 
 	const pageLinks = [
 		{ href: '/', label: 'Flashcards', icon: BookOpen },
-		{ href: '/verbs', label: 'Verbs', icon: BookA }
+		{ href: '/verbs', label: 'Verbs', icon: BookA },
+		{ href: '/quiz', label: 'Quiz', icon: GraduationCap }
 	] as const;
 
 	function isActive(href: string): boolean {
