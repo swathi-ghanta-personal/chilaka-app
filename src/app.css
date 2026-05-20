@@ -44,3 +44,9 @@ body {
 	color: var(--color-text);
 	font-family: var(--font-body);
 }
+
+/* Brand wordmark — global so Pacifico survives scoped-component / merge edge cases */
+.brand-name {
+	font-family: var(--font-display);
+	font-weight: 400;
+}

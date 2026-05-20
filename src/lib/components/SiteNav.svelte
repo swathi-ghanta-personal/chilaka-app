@@ -295,8 +295,8 @@
 	}
 
 	.brand-name {
-		font-family: var(--font-display);
-		font-size: 1.6rem;
+		font-family: 'Pacifico', cursive;
+		font-size: 1.8rem;
 		font-weight: 400;
 		color: var(--color-primary);
 		letter-spacing: 0.01em;
