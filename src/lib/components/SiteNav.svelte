@@ -7,8 +7,6 @@
 	import {
 		BookOpen,
 		BookA,
-		ChevronsLeft,
-		ChevronsRight,
 		GraduationCap,
 		LogIn,
 		LogOut,
@@ -34,7 +32,6 @@
 	let dialog: HTMLDialogElement | undefined = $state();
 	let activeTab = $state<'signin' | 'signup'>('signin');
 	let mobileMenuOpen = $state(false);
-	let sidebarCollapsed = $state(false);
 
 	const pageLinks = [
 		{ href: '/', label: 'Flashcards', icon: BookOpen },
@@ -66,10 +63,6 @@
 		mobileMenuOpen = !mobileMenuOpen;
 	}
 
-	function toggleCollapse() {
-		sidebarCollapsed = !sidebarCollapsed;
-	}
-
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape' && mobileMenuOpen) {
 			closeMobileMenu();
@@ -94,25 +87,12 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<aside class="sidebar" class:collapsed={sidebarCollapsed} aria-label="Site navigation">
+<aside class="sidebar" aria-label="Site navigation">
 	<div class="sidebar-top">
 		<a href="/" class="brand" onclick={closeMobileMenu}>
 			<img src={parrot} class="brand-icon" alt="Chilaka" width="48" height="48" />
 			<span class="brand-name">Chilaka</span>
 		</a>
-
-		<button
-			type="button"
-			class="collapse-toggle"
-			onclick={toggleCollapse}
-			aria-label={sidebarCollapsed ? 'Expand navigation' : 'Collapse navigation'}
-		>
-			{#if sidebarCollapsed}
-				<ChevronsRight size={18} strokeWidth={2} aria-hidden="true" />
-			{:else}
-				<ChevronsLeft size={18} strokeWidth={2} aria-hidden="true" />
-			{/if}
-		</button>
 
 		<button
 			type="button"
@@ -149,7 +129,6 @@
 				class:active={isActive(link.href)}
 				aria-current={isActive(link.href) ? 'page' : undefined}
 				onclick={closeMobileMenu}
-				title={sidebarCollapsed ? link.label : undefined}
 			>
 				<Icon size={20} strokeWidth={2} aria-hidden="true" />
 				<span class="link-label">{link.label}</span>
@@ -161,17 +140,17 @@
 			{#if user && !isAnonymous}
 				<span class="email link-label" title={user.email}>{user.email}</span>
 				<form method="post" action="/?/signOut" use:enhance={() => afterAuthEnhanceSubmit}>
-					<button type="submit" class="nav-btn" title={sidebarCollapsed ? 'Sign out' : undefined}>
+					<button type="submit" class="nav-btn">
 						<LogOut size={18} strokeWidth={2} aria-hidden="true" />
 						<span class="link-label">Sign out</span>
 					</button>
 				</form>
 			{:else}
-				<button type="button" class="nav-btn" onclick={() => openModal('signin')} title={sidebarCollapsed ? 'Sign in' : undefined}>
+				<button type="button" class="nav-btn" onclick={() => openModal('signin')}>
 					<LogIn size={18} strokeWidth={2} aria-hidden="true" />
 					<span class="link-label">Sign in</span>
 				</button>
-				<button type="button" class="nav-btn primary" onclick={() => openModal('signup')} title={sidebarCollapsed ? 'Create account' : undefined}>
+				<button type="button" class="nav-btn primary" onclick={() => openModal('signup')}>
 					<UserPlus size={18} strokeWidth={2} aria-hidden="true" />
 					<span class="link-label">Create account</span>
 				</button>
@@ -307,26 +286,6 @@
 		overflow: hidden;
 	}
 
-	.collapse-toggle {
-		display: none;
-		flex-shrink: 0;
-		align-items: center;
-		justify-content: center;
-		width: 32px;
-		height: 32px;
-		padding: 0;
-		border: none;
-		background: transparent;
-		color: var(--color-text-muted);
-		border-radius: var(--radius-md);
-		cursor: pointer;
-	}
-
-	.collapse-toggle:hover {
-		background: var(--color-surface);
-		color: var(--color-text);
-	}
-
 	.menu-toggle {
 		display: none;
 		align-items: center;
@@ -451,12 +410,10 @@
 			top: 0;
 			display: flex;
 			flex-direction: column;
-			overflow: hidden;
-			transition: width 200ms ease;
 		}
 
 		.sidebar-top {
-			padding: 1.25rem 1rem 0.75rem;
+			padding: 1.5rem 1rem 0.75rem;
 			flex-shrink: 0;
 		}
 
@@ -468,59 +425,8 @@
 			overflow-y: auto;
 		}
 
-		.collapse-toggle {
-			display: flex;
-		}
-
 		.backdrop {
 			display: none;
-		}
-
-		/* Collapsed state */
-		.sidebar.collapsed {
-			width: 64px;
-		}
-
-		.sidebar.collapsed .brand {
-			flex: 0 0 auto;
-		}
-
-		.sidebar.collapsed .brand-name {
-			display: none;
-		}
-
-		.sidebar.collapsed .sidebar-top {
-			padding: 1rem 0;
-			justify-content: center;
-			flex-direction: column;
-			align-items: center;
-			gap: 0.25rem;
-		}
-
-		.sidebar.collapsed .collapse-toggle {
-			width: 36px;
-			height: 36px;
-		}
-
-		.sidebar.collapsed .nav-link {
-			justify-content: center;
-			padding: 0.65rem;
-		}
-
-		.sidebar.collapsed .link-label {
-			display: none;
-		}
-
-		.sidebar.collapsed .nav-btn {
-			justify-content: center;
-			padding: 0.6rem;
-			width: auto;
-			align-self: center;
-		}
-
-		.sidebar.collapsed .auth-block {
-			align-items: center;
-			padding: 1rem 0 1.25rem;
 		}
 	}
 
