@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { verbs, TENSES, TENSE_LABELS, type Tense, type Verb } from '$lib/data/verbs';
+	import PlayIndicator from '$lib/components/PlayIndicator.svelte';
+	import { playPronunciation, type PlayState } from '$lib/utils/audio';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	let selectedVerbId = $state<string>(verbs[0].id);
 	let selectedTense = $state<Tense>('present');
 	let error = $state<string | null>(null);
 
-	const playingIds = $state(new Set<string>());
+	const playStates = new SvelteMap<string, PlayState>();
 
 	const selectedVerb = $derived<Verb>(
 		verbs.find((v) => v.id === selectedVerbId) ?? verbs[0]
@@ -14,32 +17,8 @@
 	const activeConjugations = $derived(selectedVerb.conjugations[selectedTense]);
 	const activeExamples = $derived(selectedVerb.examples[selectedTense]);
 
-	async function playPronunciation(teluguScript: string, id: string) {
-		if (playingIds.has(id)) return;
-		playingIds.add(id);
-		try {
-			const res = await fetch('/api/tts', {
-				method: 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ teluguScript })
-			});
-			if (!res.ok) throw new Error('Audio failed');
-			const blob = await res.blob();
-			const url = URL.createObjectURL(blob);
-			const audio = new Audio(url);
-			audio.addEventListener('ended', () => {
-				URL.revokeObjectURL(url);
-				playingIds.delete(id);
-			});
-			audio.addEventListener('error', () => {
-				URL.revokeObjectURL(url);
-				playingIds.delete(id);
-			});
-			await audio.play();
-		} catch (err) {
-			playingIds.delete(id);
-			error = err instanceof Error ? err.message : 'Audio failed';
-		}
+	function playAudio(teluguScript: string, id: string) {
+		return playPronunciation(teluguScript, id, playStates, (msg) => (error = msg));
 	}
 </script>
 
@@ -101,6 +80,7 @@
 		<table class="conjugations">
 			<tbody>
 				{#each activeConjugations as row, idx (selectedVerb.id + '-' + selectedTense + '-' + idx)}
+					{@const conjId = `conj-${selectedVerb.id}-${selectedTense}-${idx}`}
 					<tr>
 						<td class="cell pronoun-cell">
 							<div class="cell-script">{row.pronoun.script}</div>
@@ -115,21 +95,14 @@
 							</div>
 							<button
 								type="button"
-								class="play"
-								class:playing={playingIds.has(
-									`conj-${selectedVerb.id}-${selectedTense}-${idx}`
-								)}
-								onclick={() =>
-									playPronunciation(
-										row.verb.script,
-										`conj-${selectedVerb.id}-${selectedTense}-${idx}`
-									)}
-								disabled={playingIds.has(
-									`conj-${selectedVerb.id}-${selectedTense}-${idx}`
-								)}
+								class="play small"
+								class:fetching={playStates.get(conjId) === 'fetching'}
+								class:playing={playStates.get(conjId) === 'playing'}
+								onclick={() => playAudio(row.verb.script, conjId)}
+								disabled={playStates.has(conjId)}
 								aria-label="Play pronunciation"
 							>
-								▶︎
+								<PlayIndicator state={playStates.get(conjId) ?? 'idle'} size={14} />
 							</button>
 						</td>
 					</tr>
@@ -142,6 +115,7 @@
 		<h2>In a sentence</h2>
 		<ul>
 			{#each activeExamples as ex, idx (selectedVerb.id + '-' + selectedTense + '-ex-' + idx)}
+				{@const exId = `ex-${selectedVerb.id}-${selectedTense}-${idx}`}
 				<li class="example">
 					<div class="example-text">
 						<div class="cell-script">{ex.script}</div>
@@ -150,17 +124,14 @@
 					</div>
 					<button
 						type="button"
-						class="play"
-						class:playing={playingIds.has(`ex-${selectedVerb.id}-${selectedTense}-${idx}`)}
-						onclick={() =>
-							playPronunciation(
-								ex.script,
-								`ex-${selectedVerb.id}-${selectedTense}-${idx}`
-							)}
-						disabled={playingIds.has(`ex-${selectedVerb.id}-${selectedTense}-${idx}`)}
+						class="play small"
+						class:fetching={playStates.get(exId) === 'fetching'}
+						class:playing={playStates.get(exId) === 'playing'}
+						onclick={() => playAudio(ex.script, exId)}
+						disabled={playStates.has(exId)}
 						aria-label="Play sentence"
 					>
-						▶︎
+						<PlayIndicator state={playStates.get(exId) ?? 'idle'} size={14} />
 					</button>
 				</li>
 			{/each}
@@ -390,16 +361,24 @@
 		background: #fff;
 		border: 1px solid #ddd;
 		border-radius: 999px;
-		width: 32px;
-		height: 32px;
+		width: 36px;
+		height: 36px;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 0.8rem;
 		padding: 0;
 		cursor: pointer;
 		color: #1a1a1a;
 		transition: transform 120ms ease;
+	}
+
+	.play.small {
+		width: 30px;
+		height: 30px;
+	}
+
+	.play:hover:not(:disabled) {
+		background: #f5f5f5;
 	}
 
 	.play:active:not(:disabled) {
@@ -411,9 +390,13 @@
 		cursor: progress;
 	}
 
+	.play.fetching,
 	.play.playing {
 		color: var(--color-primary, #e8608a);
 		border-color: color-mix(in srgb, var(--color-primary, #e8608a) 35%, #ddd);
+	}
+
+	.play.playing {
 		animation: play-pulse 1.4s ease-out infinite;
 	}
 

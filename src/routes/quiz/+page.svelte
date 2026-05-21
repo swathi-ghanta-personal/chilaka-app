@@ -2,9 +2,12 @@
 	import { untrack } from 'svelte';
 	import { page } from '$app/state';
 	import { fly } from 'svelte/transition';
-	import { LoaderCircle, Volume2 } from '@lucide/svelte';
+	import { LoaderCircle } from '@lucide/svelte';
 	import parrot from '$lib/assets/parrot.png';
 	import chilakaEmpty from '$lib/assets/chilaka-empty.png';
+	import PlayIndicator from '$lib/components/PlayIndicator.svelte';
+	import { playPronunciation, type PlayState } from '$lib/utils/audio';
+	import { SvelteMap } from 'svelte/reactivity';
 	import type { PageData } from './$types';
 
 	interface Card {
@@ -50,7 +53,11 @@
 	let error = $state<string | null>(null);
 	let inputEl = $state<HTMLInputElement | undefined>();
 
-	const playingIds = $state(new Set<string>());
+	const playStates = new SvelteMap<string, PlayState>();
+
+	function playAudio(teluguScript: string, id: string) {
+		return playPronunciation(teluguScript, id, playStates, (msg) => (error = msg));
+	}
 
 	const topItem = $derived<DeckItem | undefined>(deck[0]);
 	const topCard = $derived<Card | undefined>(topItem?.card);
@@ -125,34 +132,6 @@
 		guess = '';
 		phase = 'idle';
 		requestAnimationFrame(() => inputEl?.focus());
-	}
-
-	async function playPronunciation(teluguScript: string, id: string) {
-		if (playingIds.has(id)) return;
-		playingIds.add(id);
-		try {
-			const res = await fetch('/api/tts', {
-				method: 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ teluguScript })
-			});
-			if (!res.ok) throw new Error('Audio failed');
-			const blob = await res.blob();
-			const url = URL.createObjectURL(blob);
-			const audio = new Audio(url);
-			audio.addEventListener('ended', () => {
-				URL.revokeObjectURL(url);
-				playingIds.delete(id);
-			});
-			audio.addEventListener('error', () => {
-				URL.revokeObjectURL(url);
-				playingIds.delete(id);
-			});
-			await audio.play();
-		} catch (err) {
-			playingIds.delete(id);
-			error = err instanceof Error ? err.message : 'Audio failed';
-		}
 	}
 
 	function openSignIn() {
@@ -231,15 +210,17 @@
 						style="--stack-idx: {idx};"
 					>
 						{#if idx === 0}
+							{@const quizId = `quiz-${item.key}`}
 							<button
 								type="button"
 								class="play"
-								class:playing={playingIds.has(`quiz-${item.key}`)}
-								onclick={() => playPronunciation(item.card.teluguScript, `quiz-${item.key}`)}
-								disabled={playingIds.has(`quiz-${item.key}`)}
+								class:fetching={playStates.get(quizId) === 'fetching'}
+								class:playing={playStates.get(quizId) === 'playing'}
+								onclick={() => playAudio(item.card.teluguScript, quizId)}
+								disabled={playStates.has(quizId)}
 								aria-label="Play pronunciation"
 							>
-								<Volume2 size={18} strokeWidth={2} aria-hidden="true" />
+								<PlayIndicator state={playStates.get(quizId) ?? 'idle'} size={18} />
 							</button>
 						{/if}
 
@@ -493,10 +474,6 @@
 		animation: play-pulse 1.4s ease-out infinite;
 	}
 
-	.play.playing :global(svg) {
-		animation: play-icon-pulse 1.4s ease-in-out infinite;
-	}
-
 	@keyframes play-pulse {
 		0% {
 			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 45%, transparent);
@@ -506,16 +483,6 @@
 		}
 		100% {
 			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 0%, transparent);
-		}
-	}
-
-	@keyframes play-icon-pulse {
-		0%,
-		100% {
-			transform: scale(1);
-		}
-		50% {
-			transform: scale(1.12);
 		}
 	}
 

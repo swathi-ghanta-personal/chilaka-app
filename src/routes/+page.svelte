@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-	import { LoaderCircle, Mic, Square, Trash2, Volume2 } from '@lucide/svelte';
+	import { LoaderCircle, Mic, Square, Trash2 } from '@lucide/svelte';
 	import { showToast } from '$lib/stores/toast.svelte';
+	import PlayIndicator from '$lib/components/PlayIndicator.svelte';
+	import { playPronunciation, type PlayState } from '$lib/utils/audio';
+	import { SvelteMap } from 'svelte/reactivity';
 	import type { PageData } from './$types';
 
 	type SourceLang = 'te' | 'en';
@@ -28,7 +31,11 @@
 	let recordedChunks: Blob[] = [];
 	let activeStream: MediaStream | null = null;
 
-	const playingIds = $state(new Set<string>());
+	const playStates = new SvelteMap<string, PlayState>();
+
+	function playAudio(teluguScript: string, id: string) {
+		return playPronunciation(teluguScript, id, playStates, (msg) => (error = msg));
+	}
 
 	async function translateText() {
 		const text = textInput.trim();
@@ -122,34 +129,6 @@
 		}
 	}
 
-	async function playPronunciation(teluguScript: string, id: string) {
-		if (playingIds.has(id)) return;
-		playingIds.add(id);
-		try {
-			const res = await fetch('/api/tts', {
-				method: 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ teluguScript })
-			});
-			if (!res.ok) throw new Error('Audio failed');
-			const blob = await res.blob();
-			const url = URL.createObjectURL(blob);
-			const audio = new Audio(url);
-			audio.addEventListener('ended', () => {
-				URL.revokeObjectURL(url);
-				playingIds.delete(id);
-			});
-			audio.addEventListener('error', () => {
-				URL.revokeObjectURL(url);
-				playingIds.delete(id);
-			});
-			await audio.play();
-		} catch (err) {
-			playingIds.delete(id);
-			error = err instanceof Error ? err.message : 'Audio failed';
-		}
-	}
-
 	function clearCard() {
 		card = null;
 		textInput = '';
@@ -226,12 +205,13 @@
 				<button
 					type="button"
 					class="play"
-					class:playing={playingIds.has('result')}
-					onclick={() => playPronunciation(card!.teluguScript, 'result')}
-					disabled={playingIds.has('result')}
+					class:fetching={playStates.get('result') === 'fetching'}
+					class:playing={playStates.get('result') === 'playing'}
+					onclick={() => playAudio(card!.teluguScript, 'result')}
+					disabled={playStates.has('result')}
 					aria-label="Play pronunciation"
 				>
-					<Volume2 size={16} strokeWidth={2} aria-hidden="true" />
+					<PlayIndicator state={playStates.get('result') ?? 'idle'} size={16} />
 				</button>
 			</div>
 			<div class="result-row roman">{card.teluguRoman}</div>
@@ -277,12 +257,13 @@
 							<button
 								type="button"
 								class="play small"
-								class:playing={playingIds.has(`saved-${item.id}`)}
-								onclick={() => playPronunciation(item.teluguScript, `saved-${item.id}`)}
-								disabled={playingIds.has(`saved-${item.id}`)}
+								class:fetching={playStates.get(`saved-${item.id}`) === 'fetching'}
+								class:playing={playStates.get(`saved-${item.id}`) === 'playing'}
+								onclick={() => playAudio(item.teluguScript, `saved-${item.id}`)}
+								disabled={playStates.has(`saved-${item.id}`)}
 								aria-label="Play pronunciation"
 							>
-								<Volume2 size={14} strokeWidth={2} aria-hidden="true" />
+								<PlayIndicator state={playStates.get(`saved-${item.id}`) ?? 'idle'} size={14} />
 							</button>
 							<form
 								method="post"
@@ -527,14 +508,14 @@
 		opacity: 1;
 	}
 
+	.play.fetching,
 	.play.playing {
 		color: var(--color-primary, #e8608a);
 		border-color: color-mix(in srgb, var(--color-primary, #e8608a) 35%, #ddd);
-		animation: play-pulse 1.4s ease-out infinite;
 	}
 
-	.play.playing :global(svg) {
-		animation: play-icon-pulse 1.4s ease-in-out infinite;
+	.play.playing {
+		animation: play-pulse 1.4s ease-out infinite;
 	}
 
 	@keyframes play-pulse {
@@ -546,16 +527,6 @@
 		}
 		100% {
 			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary, #e8608a) 0%, transparent);
-		}
-	}
-
-	@keyframes play-icon-pulse {
-		0%,
-		100% {
-			transform: scale(1);
-		}
-		50% {
-			transform: scale(1.12);
 		}
 	}
 
