@@ -336,6 +336,13 @@
 		border: 1px solid var(--color-border-strong);
 		border-radius: 10px;
 		background: var(--color-surface);
+		transition: border-color 120ms ease, box-shadow 120ms ease;
+	}
+
+	.input-wrap input[type='text']:focus {
+		outline: none;
+		border-color: var(--color-focus);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus) 20%, transparent);
 	}
 
 	.mic-btn {

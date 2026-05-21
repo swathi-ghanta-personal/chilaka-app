@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { fly } from 'svelte/transition';
 	import { LoaderCircle } from '@lucide/svelte';
-	import parrot from '$lib/assets/parrot.png';
+	import quizComplete from '$lib/assets/chilaka-quiz-complete.png';
 	import chilakaEmpty from '$lib/assets/chilaka-empty.png';
 	import PlayIndicator from '$lib/components/PlayIndicator.svelte';
 	import { playPronunciation, type PlayState } from '$lib/utils/audio';
@@ -171,7 +171,7 @@
 					></span>
 				{/each}
 			</div>
-			<img src={parrot} alt="Chilaka" class="celebration-mascot" />
+			<img src={quizComplete} alt="Chilaka" class="celebration-mascot" />
 			<h1>Great job!</h1>
 			<div class="score-card">
 				<div class="score-row correct">
@@ -527,11 +527,13 @@
 		border-radius: var(--radius-md);
 		background: var(--color-surface);
 		box-sizing: border-box;
+		transition: border-color 120ms ease, box-shadow 120ms ease;
 	}
 
 	.answer input:focus {
 		outline: none;
-		border-color: var(--color-primary);
+		border-color: var(--color-focus);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus) 20%, transparent);
 	}
 
 	.answer input:disabled {
