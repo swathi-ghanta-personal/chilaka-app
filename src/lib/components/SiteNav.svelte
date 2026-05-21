@@ -688,8 +688,8 @@
 		margin: 0 0 1rem;
 		font-size: 0.875rem;
 		color: var(--color-error);
-		background: #fff5f5;
-		border: 1px solid #fecaca;
+		background: var(--color-error-bg);
+		border: 1px solid var(--color-error-border);
 		border-radius: var(--radius-md);
 		padding: 0.6rem 0.8rem;
 	}

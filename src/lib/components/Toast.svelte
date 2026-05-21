@@ -56,7 +56,7 @@
 		gap: 0.6rem;
 		padding: 0.65rem 0.6rem 0.65rem 0.85rem;
 		background: var(--color-text);
-		color: #fff;
+		color: var(--color-surface);
 		border-radius: var(--radius-md);
 		font-size: 0.9rem;
 		font-weight: 500;
@@ -67,15 +67,15 @@
 	}
 
 	.toast-success .icon {
-		color: #6ee7a1;
+		color: color-mix(in srgb, var(--color-accent-green) 55%, var(--color-surface));
 	}
 
 	.toast-error .icon {
-		color: #fca5a5;
+		color: color-mix(in srgb, var(--color-error) 50%, var(--color-surface));
 	}
 
 	.toast-info .icon {
-		color: #93c5fd;
+		color: color-mix(in srgb, var(--color-accent-blue) 50%, var(--color-surface));
 	}
 
 	.icon {
@@ -106,7 +106,7 @@
 	}
 
 	.close:hover {
-		color: #fff;
+		color: var(--color-surface);
 		background: rgba(255, 255, 255, 0.1);
 	}
 </style>

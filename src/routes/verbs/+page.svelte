@@ -185,27 +185,27 @@
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 0.1rem;
-		background: #fff;
-		border: 1px solid #ddd;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border-strong);
 		border-radius: 12px;
 		padding: 0.55rem 0.85rem;
 		cursor: pointer;
 		text-align: left;
 		font-family: inherit;
-		color: #1a1a1a;
+		color: var(--color-text);
 		transition:
 			background 120ms ease,
 			border-color 120ms ease;
 	}
 
 	.verb-pill:hover {
-		border-color: #b8b8b8;
+		border-color: color-mix(in srgb, var(--color-border-strong) 60%, var(--color-text-muted));
 	}
 
 	.verb-pill.active {
-		background: #1a1a1a;
-		border-color: #1a1a1a;
-		color: #fff;
+		background: var(--color-primary);
+		border-color: var(--color-primary);
+		color: var(--color-surface);
 	}
 
 	.pill-script {
@@ -215,17 +215,17 @@
 
 	.pill-english {
 		font-size: 0.78rem;
-		color: #777;
+		color: var(--color-text-muted);
 	}
 
 	.verb-pill.active .pill-english {
-		color: #d8d8d8;
+		color: color-mix(in srgb, var(--color-surface) 80%, var(--color-primary));
 	}
 
 	.tense-toggle {
 		display: inline-flex;
 		gap: 0;
-		background: #f1f1f1;
+		background: var(--color-surface-muted);
 		padding: 4px;
 		border-radius: 999px;
 		margin-bottom: 1.25rem;
@@ -239,26 +239,26 @@
 		font-size: 0.9rem;
 		border-radius: 999px;
 		cursor: pointer;
-		color: #555;
+		color: var(--color-text-muted);
 		font-weight: 500;
 		font-family: inherit;
 	}
 
 	.toggle.active {
-		background: #fff;
-		color: #1a1a1a;
+		background: var(--color-surface);
+		color: var(--color-text);
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 	}
 
 	.error {
-		color: #c0392b;
+		color: var(--color-error);
 		font-size: 0.9rem;
 		margin: 0.5rem 0 1rem;
 	}
 
 	.conjugation-card {
-		background: #fafafa;
-		border: 1px solid #eee;
+		background: var(--color-surface-muted);
+		border: 1px solid var(--color-border-subtle);
 		border-radius: 14px;
 		padding: 0.5rem 0.5rem 0.75rem;
 		margin-bottom: 2rem;
@@ -285,20 +285,20 @@
 
 	.card-roman {
 		font-size: 0.82rem;
-		color: #888;
+		color: var(--color-text-muted);
 		font-style: italic;
 	}
 
 	.card-sub {
 		font-size: 0.9rem;
-		color: #777;
+		color: var(--color-text-muted);
 	}
 
 	.card-tense {
 		font-size: 0.78rem;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		color: #888;
+		color: var(--color-text-muted);
 		font-weight: 600;
 	}
 
@@ -311,7 +311,7 @@
 	.cell {
 		vertical-align: top;
 		padding: 0.85rem 0.75rem;
-		border-top: 1px solid #ececec;
+		border-top: 1px solid var(--color-border-subtle);
 	}
 
 	tr:first-child .cell {
@@ -340,26 +340,26 @@
 	}
 
 	.cell-script.accent {
-		color: #1c80c4;
+		color: var(--color-accent-blue);
 	}
 
 	.cell-roman {
 		font-size: 0.8rem;
-		color: #888;
+		color: var(--color-text-muted);
 		font-style: italic;
 		margin-top: 0.15rem;
 	}
 
 	.cell-english {
 		font-size: 0.9rem;
-		color: #333;
+		color: var(--color-text);
 		margin-top: 0.2rem;
 	}
 
 	.play {
 		flex: 0 0 auto;
-		background: #fff;
-		border: 1px solid #ddd;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border-strong);
 		border-radius: 999px;
 		width: 36px;
 		height: 36px;
@@ -368,7 +368,7 @@
 		justify-content: center;
 		padding: 0;
 		cursor: pointer;
-		color: #1a1a1a;
+		color: var(--color-text);
 		transition: transform 120ms ease;
 	}
 
@@ -378,7 +378,7 @@
 	}
 
 	.play:hover:not(:disabled) {
-		background: #f5f5f5;
+		background: var(--color-surface-hover);
 	}
 
 	.play:active:not(:disabled) {
@@ -392,8 +392,8 @@
 
 	.play.fetching,
 	.play.playing {
-		color: var(--color-primary, #e8608a);
-		border-color: color-mix(in srgb, var(--color-primary, #e8608a) 35%, #ddd);
+		color: var(--color-primary);
+		border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border-strong));
 	}
 
 	.play.playing {
@@ -402,20 +402,20 @@
 
 	@keyframes play-pulse {
 		0% {
-			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary, #e8608a) 45%, transparent);
+			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 45%, transparent);
 		}
 		70% {
-			box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-primary, #e8608a) 0%, transparent);
+			box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-primary) 0%, transparent);
 		}
 		100% {
-			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary, #e8608a) 0%, transparent);
+			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 0%, transparent);
 		}
 	}
 
 	.examples h2 {
 		font-size: 1rem;
 		font-weight: 600;
-		color: #555;
+		color: var(--color-text-muted);
 		margin: 0 0 0.75rem;
 	}
 
@@ -429,8 +429,8 @@
 	}
 
 	.example {
-		background: #fff;
-		border: 1px solid #eee;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border-subtle);
 		border-radius: 12px;
 		padding: 0.85rem 1rem;
 		display: flex;

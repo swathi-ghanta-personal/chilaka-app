@@ -3,16 +3,26 @@
 	--color-bg: #fdf5f7;
 	--color-surface: #ffffff;
 	--color-surface-raised: #fff0f4;
+	--color-surface-muted: #fafafa;
+	--color-surface-hover: #f5f5f5;
 	--color-border: #f0d6de;
-	--color-text: #1e0a04;
+	--color-border-strong: #ddd;
+	--color-border-subtle: #eee;
+	--color-text: #2a1408;
 	--color-text-muted: #7a5560;
 	--color-primary: #e8608a;
 	--color-primary-hover: #d04070;
 	--color-accent-green: #3aad6e;
 	--color-accent-green-hover: #2a8f58;
 	--color-accent-chocolate: #3d1a08;
+	--color-accent-blue: #1c80c4;
 	--color-active: #e8608a;
 	--color-error: #c0392b;
+	--color-error-bg: #fff5f5;
+	--color-error-border: #fecaca;
+	--color-recording: #d24545;
+	--color-recording-hover: #b83838;
+	--color-focus: var(--color-accent-green);
 
 	/* Spacing */
 	--space-xs: 0.25rem;
@@ -43,6 +53,13 @@ body {
 	background-color: var(--color-bg);
 	color: var(--color-text);
 	font-family: var(--font-body);
+}
+
+input:not([type='hidden']):focus,
+textarea:focus,
+select:focus {
+	outline: none;
+	border-color: var(--color-focus);
 }
 
 /* Brand wordmark — global so Pacifico survives scoped-component / merge edge cases */

@@ -378,20 +378,15 @@
 		flex-direction: column;
 		padding: 1.5rem;
 		transform: translateY(calc(var(--stack-idx) * 14px)) scale(calc(1 - var(--stack-idx) * 0.04));
-		opacity: calc(1 - var(--stack-idx) * 0.25);
 		z-index: calc(10 - var(--stack-idx));
 		transition:
 			transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1),
-			opacity 320ms ease,
 			box-shadow 320ms ease;
 	}
 
 	.card.leaving {
 		transform: translate(420px, -50px) rotate(10deg) scale(1) !important;
-		opacity: 0 !important;
-		transition:
-			transform 420ms cubic-bezier(0.4, 0, 0.2, 1),
-			opacity 380ms ease;
+		transition: transform 420ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	.card.wrong {
@@ -493,7 +488,7 @@
 		right: 0;
 		bottom: 0;
 		padding: 1.1rem 1.25rem 1.25rem;
-		background: linear-gradient(180deg, transparent, #fff5f5 18%);
+		background: linear-gradient(180deg, transparent, var(--color-error-bg) 18%);
 		border-bottom-left-radius: var(--radius-lg);
 		border-bottom-right-radius: var(--radius-lg);
 		text-align: center;
