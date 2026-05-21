@@ -6,6 +6,7 @@
 	import PlayIndicator from '$lib/components/PlayIndicator.svelte';
 	import { playPronunciation, type PlayState } from '$lib/utils/audio';
 	import { SvelteMap } from 'svelte/reactivity';
+	import chilakaFlashcardsEmpty from '$lib/assets/chilaka-flashcards-empty.png';
 	import type { PageData } from './$types';
 
 	type SourceLang = 'te' | 'en';
@@ -241,10 +242,14 @@
 	{/if}
 
 	<section class="saved">
-		<h2>Saved ({data.cards.length})</h2>
-		{#if data.cards.length === 0}
-			<p class="empty">No flashcards yet. Add one above.</p>
-		{:else}
+		{#if data.cards.length === 0 && !card && !translating}
+			<div class="empty">
+				<img src={chilakaFlashcardsEmpty} alt="" class="empty-art" />
+				<h2 class="empty-title">No flashcards yet!</h2>
+				<p class="empty-sub">Create your first flashcard and start learning Telugu</p>
+			</div>
+		{:else if data.cards.length > 0}
+			<h2>Saved ({data.cards.length})</h2>
 			<ul>
 				{#each data.cards as item (item.id)}
 					<li>
@@ -549,9 +554,34 @@
 	}
 
 	.empty {
-		color: var(--color-text-muted);
-		font-size: 0.9rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		padding: 1.5rem 1rem 1rem;
+		gap: 0.5rem;
+	}
+
+	.empty-art {
+		width: min(260px, 60vw);
+		height: auto;
+		margin-bottom: 0.25rem;
+	}
+
+	.empty-title {
+		font-family: var(--font-body);
+		font-size: var(--text-xl);
+		font-weight: 600;
+		color: var(--color-text);
 		margin: 0;
+	}
+
+	.empty-sub {
+		font-family: var(--font-body);
+		font-size: var(--text-sm);
+		color: var(--color-text-muted);
+		margin: 0;
+		max-width: 32ch;
 	}
 
 	.saved ul {
